@@ -110,6 +110,7 @@ int main() {
     struct padButtonStatus buttons;
     u32 new_pad;
     char* filename = "none";
+    char* gamename = "none";
     int executing = 0;
 
     InitPS2();
@@ -125,7 +126,7 @@ int main() {
         }
 
         char tempstr[64];
-        sprintf(tempstr, "Selected: %s\n", filename);
+        sprintf(tempstr, "Selected: %s\n", gamename);
         gsKit_fontm_print_scaled(gsGlobal, gsFontM, 10, 10, 1, 0.7f, WhiteFont, "Welcome to Sestain's bootleg loader\n\n");
         gsKit_fontm_print_scaled(gsGlobal, gsFontM, 10, 30, 1, 0.7f, WhiteFont, tempstr);
         gsKit_fontm_print_scaled(gsGlobal, gsFontM, 10, 50, 1, 0.7f, WhiteFont, "Press start to boot game\n");
@@ -133,17 +134,24 @@ int main() {
         if (padRead(0, 0, &buttons) != 0) {
             new_pad = 0xffff ^ buttons.btns;
 
-            if (new_pad & PAD_CROSS)
-                filename = "cdrom0:\\SLES_525.68;1"; // PAL
-            else if (new_pad & PAD_CIRCLE)
-                filename = "cdrom0:\\SLPM_658.01;1"; // NTSC-J
-            else if (new_pad & PAD_SQUARE)
-                filename = "cdrom0:\\SLUS_209.09;1"; // NTSC-U
-            else if (new_pad & PAD_TRIANGLE)
-                filename = "cdrom0:\\SLUS_209.09_2;1"; // NTSC-U 2.0
-
+            if (new_pad & PAD_CROSS) {
+                gamename = "Crash Twinsanity PAL"; // PAL
+                filename = "cdrom0:\\SLES_525.68;1"; 
+            }  
+            else if (new_pad & PAD_CIRCLE) {
+                gamename = "Crash Twinsanity NTSC-J"; // NTSC-J
+                filename = "cdrom0:\\SLPM_658.01;1"; 
+            }
+            else if (new_pad & PAD_SQUARE) {
+                gamename = "Crash Twinsanity NTSC-U 1"; // NTSC-U
+                filename = "cdrom0:\\SLUS_209.09;1"; 
+            }
+            else if (new_pad & PAD_TRIANGLE) {
+                gamename = "Crash Twinsanity NTSC-U 2"; // NTSC-U 2.0
+                filename = "cdrom0:\\SLUS_209.09_2;1"; 
+            }
             if (new_pad & PAD_START) {
-                if (strcmp(filename, "none") != 0 && executing != 2)
+                if (strcmp(gamename, "none") != 0 && executing != 2)
                     executing = 1;
             }
         }
