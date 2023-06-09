@@ -14,8 +14,5 @@ clean:
 
 rebuild:clean all
 
-release:rebuild
-	rm -f *.elf *.o *.a *.s *.i *.map
-
 include $(PS2SDK)/samples/Makefile.pref
-include $(PS2SDK)/samples/Makefile.eeglobal
+include $(PS2SDK)/samples/Makefile.eeglobal_cpp
