@@ -2,8 +2,9 @@
 #include <stdio.h>
 #include <sifrpc.h>
 #include <libpad.h>
-#include <iopcontrol.h>
+#include <libcdvd.h>
 #include <loadfile.h>
+#include <iopcontrol.h>
 #include <elf-loader.h>
 
 char padBuf[256] __attribute__((aligned(64)));
@@ -42,6 +43,8 @@ int main() {
     Init();
 
     while (1) {
+        sceCdStop();
+        sceCdSync(0);
         gsKit_clear(gsGlobal, GS_SETREG_RGBAQ(0x00, 0x00, 0x00, 0x00, 0x00));
 
         if (executing == 1) {
