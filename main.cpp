@@ -44,6 +44,9 @@ void Init() {
 
     padInit(0);
     padPortOpen(0, 0, padBuf);
+
+    sceCdStop();
+    sceCdSync(0);
 }
 
 int main() {
@@ -56,8 +59,6 @@ int main() {
     Init();
 
     while (1) {
-        sceCdStop();
-        sceCdSync(0);
         gsKit_clear(gsGlobal, GS_SETREG_RGBAQ(0x00, 0x00, 0x00, 0x00, 0x00));
 
         if (executing == 1) {
