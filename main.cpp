@@ -6,6 +6,7 @@
 #include <loadfile.h>
 #include <iopcontrol.h>
 #include <elf-loader.h>
+#include <sbv_patches.h>
 
 char padBuf[256] __attribute__((aligned(64)));
 const u32 WhiteFont = GS_SETREG_RGBAQ(0xEB, 0xEB, 0xEB, 0x80, 0x00);
@@ -13,16 +14,28 @@ const u32 WhiteFont = GS_SETREG_RGBAQ(0xEB, 0xEB, 0xEB, 0x80, 0x00);
 GSGLOBAL* gsGlobal;
 GSFONTM* gsFontM;
 
+extern u8 sio2man_irx[];
+extern int size_sio2man_irx;
+
+extern u8 padman_irx[];
+extern int size_padman_irx;
+
 void Init() {
+    int ret;
+    
     SifInitRpc(0);
-    while (!SifIopReset("", 0));
+    SifIopReset("", 0);
     while (!SifIopSync());
     SifInitRpc(0);
 
-    SifLoadModule("rom0:SIO2MAN", 0, nullptr);
-    SifLoadModule("rom0:PADMAN", 0, nullptr);
+    sbv_patch_enable_lmb();
+    sbv_patch_disable_prefix_check();
+
+    SifExecModuleBuffer(&sio2man_irx, size_sio2man_irx, 0, nullptr, &ret);
+    SifExecModuleBuffer(&padman_irx, size_padman_irx, 0, nullptr, &ret);
 
     gsGlobal = gsKit_init_global();
+    gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
     gsKit_init_screen(gsGlobal);
 
     gsFontM = gsKit_init_fontm();
