@@ -3,7 +3,7 @@
 ## Description
 
 - I wanted to do a PS2 game loader like I did for PS1.
-- Tested on PCSX2 Nightly (v1.7.4558 Compiled on Jun 6 2023).
+- Tested on PCSX2 Nightly (v1.7.5577 Compiled on Feb 24 2024).
 - Tested on SCPH-50004 (mechapwn'd) (ISO file was patched with filepatcher to be a master disc and launched using wLE).
 
 ## Compiling and usage
