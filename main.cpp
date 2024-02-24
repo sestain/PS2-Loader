@@ -54,14 +54,14 @@ int main() {
     u32 new_pad;
     const char* filename = "none";
     const char* gamename = "none";
-    int executing = 0;
+    bool executing = false;
     
     Init();
 
     while (1) {
         gsKit_clear(gsGlobal, GS_SETREG_RGBAQ(0x00, 0x00, 0x00, 0x00, 0x00));
 
-        if (executing == 1) {
+        if (executing) {
             LoadELFFromFile(filename, 0, nullptr);
         }
 
@@ -89,12 +89,12 @@ int main() {
                 filename = "cdrom0:\\SLUS_209.09_2;1";
             }
             if (new_pad & PAD_START) {
-                if (strcmp(gamename, "none") != 0 && executing != 1)
-                    executing = 1;
+                if (strcmp(gamename, "none") != 0 && !executing)
+                    executing = !executing;
             }
         }
 
-        if (executing == 1) {
+        if (executing) {
             char tempstr2[64];
             snprintf(tempstr2, sizeof(tempstr2), "Booting: %s", gamename);
             gsKit_fontm_print_scaled(gsGlobal, gsFontM, 10, 70, 1, 0.7f, WhiteFont, tempstr2);
