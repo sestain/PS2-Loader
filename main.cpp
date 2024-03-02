@@ -93,7 +93,7 @@ int main() {
 
     while (1) {
         if (executing) {
-            // Executes ELF binary from disc, if not found exits and returns to PS2 Browser. (Shows debug colors on real hardware)
+            // Executes ELF binary from disc, if not found, then returns to PS2 Browser. (Shows debug colors on real hardware)
             LoadELFFromFile(filename, 0, nullptr);
         }
 
