@@ -12,7 +12,7 @@ To build this, you'll need the (latest recommended) [PS2SDK](https://github.com/
 
 Once you have the SDK ready, you can start compiling it by going into the git cloned or downloaded folder.
 
-Now that you are in the source directory, you can do ```make``` and it should compile and create an elf file.
+Now that you are in the source directory, you can do ```make```, then it should compile and create an elf file.
 
 Once you have compiled and have an elf file, now you get to extract all the game files, combine them, and hex edit some bytes (since CRASH.BD and BH are a little different between versions) to make the game's elf binary read the correct files. (I recommend renaming the elf binary to ```SLES_999.01``` and using SYSTEM.CNF that was included in the source).
 
