@@ -30,7 +30,9 @@ extern const unsigned int size_padman_irx;
 void Init() {
     gsGlobal = gsKit_init_global();
     gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
+    gsGlobal->DoubleBuffering = GS_SETTING_OFF;
     gsKit_init_screen(gsGlobal);
+    gsKit_sync_flip(gsGlobal);
 
     gsFontM = gsKit_init_fontm();
     gsKit_fontm_upload(gsGlobal, gsFontM);
@@ -87,12 +89,18 @@ int main() {
     const char* gamename{ "none" };
     const char* filename{ "none" };
     bool executing{ false };
-    int screenUpdateNeeded{ 1 };
+    bool screenUpdateNeeded{ true };
 
     Init();
 
     while (1) {
         if (executing) {
+            // Fixes issues that might occur after game launches (example: game crashing on a loading screen)
+	        SifInitRpc(0);
+	        while (!SifIopReset("", 0));
+	        while (!SifIopSync());
+	        SifInitRpc(0);
+
             // Executes ELF binary from disc, if not found, then returns to PS2 Browser. (Shows debug colors on real hardware)
             LoadELFFromFile(filename, 0, nullptr);
         }
@@ -109,14 +117,14 @@ int main() {
                     snprintf(tempBuffer, sizeof(tempBuffer), "cdrom0:\\%s", gameInfos[i].serial);
                     filename = tempBuffer;
 
-                    screenUpdateNeeded = 1;
+                    screenUpdateNeeded = true;
                 }
             }
 
             if (new_pad & PAD_START) {
                 if (strcmp(gamename, "none") != 0 && !executing) {
                     executing = !executing;
-                    screenUpdateNeeded = 1;
+                    screenUpdateNeeded = true;
                 }
             }
         }
@@ -129,17 +137,15 @@ int main() {
             RenderUI(gamename, executing);
 
             // Refresh display
-            gsKit_sync_flip(gsGlobal);
             gsKit_queue_exec(gsGlobal);
 
-            screenUpdateNeeded++;
             // Reset the flag after rendering
-            if (screenUpdateNeeded > 2)
-                screenUpdateNeeded = 0;
+            if (screenUpdateNeeded)
+                screenUpdateNeeded = false;
         }
         
         // Sleeping so fps is half of Vsync
-        usleep(25000);
+        usleep(40000);
     }
 
     // Unreachable
