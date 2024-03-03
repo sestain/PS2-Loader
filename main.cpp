@@ -140,8 +140,7 @@ int main() {
             gsKit_queue_exec(gsGlobal);
 
             // Reset the flag after rendering
-            if (screenUpdateNeeded)
-                screenUpdateNeeded = false;
+            screenUpdateNeeded = false;
         }
         
         // Sleeping so fps is half of Vsync
