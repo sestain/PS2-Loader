@@ -154,8 +154,8 @@ int main() {
 #ifndef SKIP_SIZE_REDUCTION_MACROS
 void _libcglue_init() {}
 void _libcglue_deinit() {}
-void _libcglue_args_parse() {}
+void _libcglue_args_parse() {} // dont use this if your app depends on relative paths accesing
 DISABLE_PATCHED_FUNCTIONS();
 DISABLE_EXTRA_TIMERS_FUNCTIONS();
-#endif
 PS2_DISABLE_AUTOSTART_PTHREAD();
+#endif
