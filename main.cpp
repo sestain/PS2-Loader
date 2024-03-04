@@ -150,3 +150,12 @@ int main() {
     // Unreachable
     return 0;
 }
+
+#ifndef SKIP_SIZE_REDUCTION_MACROS
+void _libcglue_init() {}
+void _libcglue_deinit() {}
+void _libcglue_args_parse() {}
+DISABLE_PATCHED_FUNCTIONS();
+DISABLE_EXTRA_TIMERS_FUNCTIONS();
+#endif
+PS2_DISABLE_AUTOSTART_PTHREAD();
