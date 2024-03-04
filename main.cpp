@@ -9,6 +9,7 @@
 #include <sbv_patches.h>
 #include <unistd.h>
 #include <kernel.h>
+#include <ps2sdkapi.h>
 
 struct GameInfo {
     const char* name;
