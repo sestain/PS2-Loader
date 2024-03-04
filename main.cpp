@@ -8,6 +8,7 @@
 #include <elf-loader.h>
 #include <sbv_patches.h>
 #include <unistd.h>
+#include <kernel.h>
 
 struct GameInfo {
     const char* name;
