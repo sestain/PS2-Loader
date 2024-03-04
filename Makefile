@@ -5,6 +5,10 @@ EE_INCS += -I$(GSKIT)/include
 EE_LDFLAGS = -L$(GSKIT)/lib -s
 EE_LIBS = -lgskit -ldmakit -lpad -lelf-loader -lpatches
 
+KERNEL_NOPATCH = 1 
+NEWLIB_NANO = 1
+
+
 all: $(EE_BIN)
 	$(EE_STRIP) --strip-all $(EE_BIN)
 	ps2-packer $(EE_BIN) $(EE_BIN_PKD) > /dev/null
