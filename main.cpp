@@ -7,9 +7,10 @@
 #include <iopcontrol.h>
 #include <elf-loader.h>
 #include <sbv_patches.h>
-#include <unistd.h>
 #include <kernel.h>
 #include <ps2sdkapi.h>
+
+// #include "elf.h"
 
 struct GameInfo {
     const char* name;
@@ -30,6 +31,22 @@ extern unsigned char padman_irx[] __attribute__((aligned(16)));
 extern const unsigned int size_padman_irx;
 
 void Init() {
+    // Reset the IOP
+	SifInitRpc(0);
+	while (!SifIopReset(NULL, 0)) {}
+
+	// Sync with the IOP
+	while (!SifIopSync()) {} 
+	SifInitRpc(0);
+
+	// Enable the patch that lets us load modules from memory
+	sbv_patch_enable_lmb();
+    sbv_patch_disable_prefix_check();
+
+    // Load sio2man & padman drivers (Better in someway than the ones in bios?)
+    SifExecModuleBuffer(&sio2man_irx, size_sio2man_irx, 0, 0, 0);
+    SifExecModuleBuffer(&padman_irx, size_padman_irx, 0, 0, 0);
+    
     gsGlobal = gsKit_init_global();
     gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
     gsGlobal->DoubleBuffering = GS_SETTING_OFF;
@@ -39,21 +56,6 @@ void Init() {
     gsFontM = gsKit_init_fontm();
     gsKit_fontm_upload(gsGlobal, gsFontM);
     gsFontM->Spacing = 0.9f;
-
-    // Reset the IOP
-	SifInitRpc(0);
-	while (!SifIopReset("", 0));
-
-	// Sync with the IOP
-	while (!SifIopSync());
-	SifInitRpc(0);
-
-	// Enable the patch that lets us load modules from memory
-	sbv_patch_enable_lmb();
-
-    // Load sio2man & padman drivers (Better in someway than the ones in bios?)
-    SifExecModuleBuffer(&sio2man_irx, size_sio2man_irx, 0, 0, 0);
-    SifExecModuleBuffer(&padman_irx, size_padman_irx, 0, 0, 0);
 
     // Enables controller
     padInit(0);
@@ -80,7 +82,7 @@ void RenderUI(const char* gamename, const bool executing) {
 
 int main() {
     struct padButtonStatus buttons;
-    u32 new_pad;
+    u32 buttonState;
     constexpr GameInfo gameInfos[] = {
         {"Crash Twinsanity PAL", "SLES_525.68;1", PAD_CROSS},
         {"Crash Twinsanity NTSC-J", "SLPM_658.01;1", PAD_CIRCLE},
@@ -97,33 +99,31 @@ int main() {
 
     while (1) {
         if (executing) {
-            // Fixes issues that might occur after game launches (example: game crashing on a loading screen)
-	        SifInitRpc(0);
-	        while (!SifIopReset("", 0));
-	        while (!SifIopSync());
-	        SifInitRpc(0);
+            char tempBuffer[32];
+            snprintf(tempBuffer, sizeof(tempBuffer), "cdrom0:\\%s", filename);
 
-            // Executes ELF binary from disc, if not found, then returns to PS2 Browser. (Shows debug colors on real hardware)
-            LoadELFFromFile(filename, 0, nullptr);
+            // Load and execute the ELF file, if not found, then returns to PS2 Browser. (Shows debug colors on real hardware [Now only if in debug mode])
+            LoadELFFromFile(tempBuffer, 0, nullptr);
+
+            gsKit_fontm_print_scaled(gsGlobal, gsFontM, 10, 90, 1, 0.7f, WhiteFont, "Error, game not found");
+            gsKit_queue_exec(gsGlobal);
+            executing = false;
+            sceCdStop();
+            sceCdSync(0);
         }
 
         if (padRead(0, 0, &buttons) != 0) {
-            new_pad = 0xffff ^ buttons.btns;
+            buttonState = 0xffff ^ buttons.btns;
 
             for (size_t i = 0; i < sizeof(gameInfos) / sizeof(gameInfos[0]); ++i) {
-                if (new_pad & gameInfos[i].buttonMask) {
+                if (buttonState & gameInfos[i].buttonMask) {
                     gamename = gameInfos[i].name;
-
-                    // Construct the CD-ROM path with the specified format
-                    char tempBuffer[256];
-                    snprintf(tempBuffer, sizeof(tempBuffer), "cdrom0:\\%s", gameInfos[i].serial);
-                    filename = tempBuffer;
-
+                    filename = gameInfos[i].serial;
                     screenUpdateNeeded = true;
                 }
             }
 
-            if (new_pad & PAD_START) {
+            if (buttonState & PAD_START) {
                 if (strcmp(gamename, "none") != 0 && !executing) {
                     executing = !executing;
                     screenUpdateNeeded = true;
@@ -145,7 +145,7 @@ int main() {
             screenUpdateNeeded = false;
         }
         
-        // Sleeping so fps is half of Vsync
+        // Sleeping so fps is half of Vsync (Duration is in microseconds)
         usleep(40000);
     }
 
