@@ -143,8 +143,8 @@ int main() {
             screenUpdateNeeded = false;
         }
         
-        // Sleeping so fps is half of Vsync (Duration is in microseconds)
-        usleep(40000);
+        // Sleeping for Vsync (Duration is in microseconds)
+        usleep(20000); // 16683 (NTSC / 59.94fps)
     }
 
     // Unreachable
