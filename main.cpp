@@ -10,8 +10,6 @@
 #include <kernel.h>
 #include <ps2sdkapi.h>
 
-// #include "elf.h"
-
 struct GameInfo {
     const char* name;
     const char* serial;
